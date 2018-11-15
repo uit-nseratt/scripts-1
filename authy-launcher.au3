@@ -1,7 +1,7 @@
 ; Authy Launcher
 ; Version 1.0
-; Switch between personal or work Authy profile.
-; nseratt@gmail.com
+; Switch between personal or work Authy profiles.
+; Nick Seratt <nseratt@gmail.com>
 
 #include <GUIConstantsEx.au3>
 #include <FileConstants.au3>
