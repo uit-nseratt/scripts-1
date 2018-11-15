@@ -1,3 +1,8 @@
+; Authy Launcher
+; Version 1.0
+; Switch between personal or work Authy profile.
+; nseratt@gmail.com
+
 #include <GUIConstantsEx.au3>
 #include <FileConstants.au3>
 
