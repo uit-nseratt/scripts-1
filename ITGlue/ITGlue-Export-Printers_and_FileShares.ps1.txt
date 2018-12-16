@@ -1,0 +1,52 @@
+###################################################
+#
+# For importing data into IT Glue 
+# Pull information from Print Servers & File Servers
+#
+# Author: Nick Seratt <nseratt@focustsi.com>
+# 
+###################################################
+
+
+# Fileshares (run on File Server. Doesnt work on 2008r2 or below)
+
+$servername = (Get-WmiObject -Class Win32_ComputerSystem -Property Name).Name ;  Get-SmbShare -IncludeHidden -Special 0 | ?{$_.name -notmatch "(\`$|SysVol|NetLogon|CertEnroll)" -AND $_.ShareType -notmatch "(Print)"} | foreach {
+	$sharename = $_.Name
+	New-Object -TypeName PSObject -Property @{
+	        "Share Name" = $sharename
+		"Share Description" = $_.Description
+		"Servers" = "$servername"
+		"Share Path" = "\\$servername\$sharename" 
+		"Disk Path" = $_.Path
+	}
+} | Export-csv -NoTypeInformation -Path  $env:userprofile\Desktop\FileShares.csv
+ 
+
+
+#####################################################################
+
+# Printers (run on print server)
+
+Get-WmiObject -class Win32_Printer | where {$_.ShareName} | foreach {
+	$ipaddr =  $_.PortName.Replace("IP_","").Replace("FILE:","").Split("_")[0]
+	$comment =  $_.Comment
+	$ipaddrcmt = ""
+	$commentcmt = ""
+	if (![string]::IsNullOrWhiteSpace($ipaddr)) { 
+		$ipaddrcmt = "IP Address: $ipaddr <br><br> "
+	}
+	if (![string]::IsNullOrWhiteSpace($comment)) {
+		$commentcmt = "Comments: $comment <br><br> "
+	}
+
+    New-Object -TypeName PSObject -Property @{
+		"Print Name" = $_.Name
+		"Printer Share Name" = $_.ShareName
+		"Print Server(S)" = $_.PSComputerName
+		"Printer(S)" = $ipaddr
+		"Published To Ad" = ({No},{Yes})[$_.Published]
+		"Deployment" = "Group Policy"
+		"Location In The Office" = $_.Location
+		"Notes" = "$ipaddrcmt $commentcmt"
+    }
+} | Export-csv   -NoTypeInformation -Path  $env:userprofile\Desktop\Printers.csv
