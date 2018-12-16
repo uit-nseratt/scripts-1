@@ -16,10 +16,10 @@ $servername = (Get-WmiObject -Class Win32_ComputerSystem -Property Name).Name ; 
 	        "Share Name" = $sharename
 		"Share Description" = $_.Description
 		"Servers" = $servername
-		"Share Path" = "\\$servername\$sharename" 
+		"Share UNC Path" = "\\$servername\$sharename" 
 		"Disk Path" = $_.Path
 	}
-} | Export-csv -NoTypeInformation -Path  $env:userprofile\Desktop\FileShares.csv
+} | Export-csv -NoTypeInformation -Path  "$env:userprofile\Desktop\FileShares-$servername.csv"
  
 
 
@@ -27,7 +27,7 @@ $servername = (Get-WmiObject -Class Win32_ComputerSystem -Property Name).Name ; 
 
 # Printers (run on print server)
 
-Get-WmiObject -class Win32_Printer | where {$_.ShareName} | foreach {
+$servername = (Get-WmiObject -Class Win32_ComputerSystem -Property Name).Name ; Get-WmiObject -class Win32_Printer | where {$_.ShareName} | foreach {
 	$ipaddr =  $_.PortName.Replace("IP_","").Replace("FILE:","").Split("_")[0]
 	$comment =  $_.Comment
 	$ipaddrcmt = ""
@@ -49,4 +49,4 @@ Get-WmiObject -class Win32_Printer | where {$_.ShareName} | foreach {
 		"Location In The Office" = $_.Location
 		"Notes" = "$ipaddrcmt $commentcmt"
     }
-} | Export-csv   -NoTypeInformation -Path  $env:userprofile\Desktop\Printers.csv
+} | Export-csv   -NoTypeInformation -Path "$env:userprofile\Desktop\Printers-$servername.csv"
