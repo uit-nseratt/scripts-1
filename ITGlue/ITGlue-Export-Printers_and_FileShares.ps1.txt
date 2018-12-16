@@ -15,7 +15,7 @@ $servername = (Get-WmiObject -Class Win32_ComputerSystem -Property Name).Name ; 
 	New-Object -TypeName PSObject -Property @{
 	        "Share Name" = $sharename
 		"Share Description" = $_.Description
-		"Servers" = "$servername"
+		"Servers" = $servername
 		"Share Path" = "\\$servername\$sharename" 
 		"Disk Path" = $_.Path
 	}
