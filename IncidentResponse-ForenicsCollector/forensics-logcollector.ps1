@@ -17,7 +17,7 @@ function Get-TimeStamp { return "[{0:MM/dd/yy} {0:HH:mm:ss tt}]" -f (Get-Date) }
 function Get-FileDateFormat {  return "{0:MM-dd-yy_hh-mmtt}" -f (Get-Date) }
 function output-finding {
     $string = $args[0]
-    write-host "$(Get-Timestamp) ---`n$string`n"
+    write-host "`n$(Get-Timestamp) ---`n$string`n"
 }
 function Test-Administrator  
 { 
