@@ -14,7 +14,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 
 function Get-TimeStamp { return "[{0:MM/dd/yy} {0:HH:mm:ss tt}]" -f (Get-Date) }
-function Get-FileDateFormat {  return "{0:MM-dd-yy_hh:mmtt}" -f (Get-Date) }
+function Get-FileDateFormat {  return "{0:MM-dd-yy_hh-mmtt}" -f (Get-Date) }
 function output-finding {
 	$string = $args[0]
 	write-host "$(Get-Timestamp) ---`n$string`n"
@@ -207,10 +207,11 @@ if (! (Test-path -Path "$env:temp\autoruns.zip")) {
     Expand-Archive -LiteralPath "$autoruns_outfile" -DestinationPath "$env:temp\autoruns\"
 
 }   
+if (Test-path -Path "$env:temp\autoruns\autorunsc.exe") {
 output-finding "Executing Microsoft AutoRuns Report.   `n`n Cross referencing startup executables to VirusTotal - this can take a while (~5m). `n Review virustotal browser popups for any suspicious files."
 &  "$env:temp\autoruns\autorunsc.exe" -a * -c -m -s -h -vt -vr > "$outdir\autoruns.csv"
 (Get-Content "$outdir\autoruns.csv" | Select-Object -Skip 5) | Set-Content  "$outdir\autoruns.csv"
-
+}
 output-finding "Executing msinfo32, please hold.."
 get-computerinfo > "$outdir\computerinfo.txt"
 Start-process -FilePath "msinfo32" -NoNewWindow -ArgumentList "/nfo", "$outdir\msinfo32.nfo" -Wait 
