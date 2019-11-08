@@ -91,7 +91,7 @@ output-finding "Executing Get Network Shares"
 & net view \\$env:computername >  "$outdir\networkshares.txt"
 get-smbshare >>  "$outdir\networkshares.txt"
 
- output-finding "Executing Get Antiviruse Products"
+ output-finding "Executing Get Antivirus Products"
 
 Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntivirusProduct | Select * | Out-file "$outdir\SecurityCenter-Antiviruses.txt"
 
