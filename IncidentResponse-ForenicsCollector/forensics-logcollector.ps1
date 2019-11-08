@@ -1,8 +1,17 @@
-#Requires -RunAsAdministrator
+###################################################
+#
+# Collect Indications of Compromise (IoC) forensics data on a computer 
+#
+# Author: Nick Seratt <nseratt@focustsi.com>
+# 
+###################################################
+
+
+
+
+
 $ErrorActionPreference = "SilentlyContinue"
 
-$outdir = "$env:temp\sec_collector"
-$outzip = "$env:temp\sysinfo-$env:computername-$(Get-FileDateFormat).zip"
 
 function Get-TimeStamp { return "[{0:MM/dd/yy} {0:HH:mm:ss tt}]" -f (Get-Date) }
 function Get-FileDateFormat {  return "{0:MM-dd-yy_hh:mmtt}" -f (Get-Date) }
@@ -20,12 +29,28 @@ function Test-Administrator
     }
 }
 
+$outdir = "$env:temp\sec_collector"
+$outzip = "$env:temp\sysinfo-$env:computername-$(Get-FileDateFormat).zip"
+
  #Check user is running the script is member of Administrator Group
 if(-not (Test-Administrator)) {
         write-host "You need to run this script as administrator privileges"
-$HOST.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | out-null
-$HOST.UI.RawUI.Flushinputbuffer()
-exit 1
+		
+	   #Create a new Elevated process to Start PowerShell
+       $ElevatedProcess = New-Object System.Diagnostics.ProcessStartInfo "PowerShell";
+ 
+       # Specify the current script path and name as a parameter
+       $ElevatedProcess.Arguments = "& '" + $script:MyInvocation.MyCommand.Path + "'"
+ 
+       #Set the Process to elevated
+       $ElevatedProcess.Verb = "runas"
+ 
+       #Start the new elevated process
+       [System.Diagnostics.Process]::Start($ElevatedProcess) | out-null
+ 
+       #Exit from the current, unelevated, process
+       Exit 1
+	 
      }
 
 
@@ -202,8 +227,6 @@ if (Test-Path -Path "$env:temp\autoruns\") { Remove-Item -path "$env:temp\autoru
 
 output-finding "Collection completed. Press any key to exit"
 $HOST.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | out-null
-$HOST.UI.RawUI.Flushinputbuffer()
-
 exit 0
 
 
