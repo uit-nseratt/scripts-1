@@ -16,8 +16,8 @@ $ErrorActionPreference = "SilentlyContinue"
 function Get-TimeStamp { return "[{0:MM/dd/yy} {0:HH:mm:ss tt}]" -f (Get-Date) }
 function Get-FileDateFormat {  return "{0:MM-dd-yy_hh-mmtt}" -f (Get-Date) }
 function output-finding {
-	$string = $args[0]
-	write-host "$(Get-Timestamp) ---`n$string`n"
+    $string = $args[0]
+    write-host "$(Get-Timestamp) ---`n$string`n"
 }
 function Test-Administrator  
 { 
@@ -35,8 +35,8 @@ $outzip = "$env:temp\sysinfo-$env:computername-$(Get-FileDateFormat).zip"
  #Check user is running the script is member of Administrator Group
 if(-not (Test-Administrator)) {
         write-host "You need to run this script as administrator privileges"
-		
-	   #Create a new Elevated process to Start PowerShell
+        
+       #Create a new Elevated process to Start PowerShell
        $ElevatedProcess = New-Object System.Diagnostics.ProcessStartInfo "PowerShell";
  
        # Specify the current script path and name as a parameter
@@ -50,7 +50,7 @@ if(-not (Test-Administrator)) {
  
        #Exit from the current, unelevated, process
        Exit 1
-	 
+     
      }
 
 
@@ -72,6 +72,12 @@ output-finding "Executing Suspicious AppData Files"
  $dir2=(Get-ChildItem -Path $env:appdata,$env:localappdata,"C:\Users\Public\appdata\","C:\Users\default\appdata\" -Recurse -Force  -ErrorAction SilentlyContinue )
  $files = $dir1 + $dir2 ; $files | where {! $_.PSIsContainer -and $_.Extension -Match '^\.(exe|bat|com|cmd|vbs|vbe|vbscript|jar|jse|wsh|wsf|ws|scr|ps1|au3|sct|shs)$'}  | Select DirectoryName,Name,Extension,@{N='Version';E={$_.VersionInfo.ProductVersion}},@{N='Product';E={$_.VersionInfo.Product}},CreationTime,LastWriteTime,Length,@{N='FileHash';E={(Get-FileHash -Path $_.FullName).Hash}},@{N='VirusTotal';E={"https://virustotal.com/#/file/"+(Get-FileHash -Path $_.FullName).Hash}} | Sort-Object -Property DirectoryName,Name | Export-Csv -Path "$outdir\Suspicious_AppData_Files.csv" -Encoding ascii -NoTypeInformation
 
+
+output-finding "Executing Environment variables"
+ Get-ChildItem Env: | ft Key,Value | file-out "$outdir\environment-vars.txt"
+
+
+
 output-finding "Executing net config workstation"
  & net config workstation  > "$outdir\netconfig-workstation.txt"
 
@@ -81,15 +87,26 @@ output-finding "Executing net config server"
 output-finding "Executing route print:"
  & route print  > "$outdir\routes.txt"
 
+output-finding "Executing route print:"
+Get-DnsClientServerAddress -AddressFamily IPv4 | ft | out-file "$outdir\network-dnsproviders.txt"
+
 output-finding "Executing Get Local Users"
  Get-LocalUser | Select * |  Out-file "$outdir\localusers.txt"
+
+output-finding "Executing Get Local Admins"
+Get-WmiObject win32_groupuser | Where-Object { $_.GroupComponent -match 'administrators' -and ($_.GroupComponent -match "Domain=`"$env:COMPUTERNAME`"")} | ForEach-Object {[wmi]$_.PartComponent } | Select-Object Caption,SID | format-table -Wrap | Out-File "$outdir\LocalAdmins.txt"
+
+
+output-finding "Executing Get Local Groups"
+Get-LocalGroup | Select * |  Out-file "$outdir\localgroups.txt"
 
 output-finding "Executing Get Domain Trusts"
 & nltest /domain_trusts /all_trusts  >  "$outdir\domaintrust.txt"
 
 output-finding "Executing Get Network Shares"
-& net view \\$env:computername >  "$outdir\networkshares.txt"
+Get-WmiObject -Class Win32_Share>  "$outdir\networkshares.txt"
 get-smbshare >>  "$outdir\networkshares.txt"
+ 
 
  output-finding "Executing Get Antivirus Products"
 
@@ -127,6 +144,12 @@ output-finding "Executing netstat -ao, this might take some time, please hold...
 output-finding "Executing netsh advfirewall export"
 & netsh advfirewall export "$outdir\advfirewallpolicy.txt"
  
+
+output-finding "Executing Is Firewall enabled? "
+$Firewall = New-Object -com HNetCfg.FwMgr
+$FireProfile = $Firewall.LocalPolicy.CurrentProfile
+if ($FireProfile.FirewallEnabled) { write-host "Firewall is enabled" }else { write-host "Firewall is disabled" }
+
 output-finding "Executing netsh firewall rule show rule name=all"
 &  netsh advfirewall firewall show rule name=all > "$outdir\firewall-all.txt"
 
@@ -211,7 +234,10 @@ if (Test-path -Path "$env:temp\autoruns\autorunsc.exe") {
 output-finding "Executing Microsoft AutoRuns Report.   `n`n Cross referencing startup executables to VirusTotal - this can take a while (~5m). `n Review virustotal browser popups for any suspicious files."
 &  "$env:temp\autoruns\autorunsc.exe" -a * -c -m -s -h -vt -vr > "$outdir\autoruns.csv"
 (Get-Content "$outdir\autoruns.csv" | Select-Object -Skip 5) | Set-Content  "$outdir\autoruns.csv"
+} else {
+Get-CimInstance Win32_StartupCommand | select * | out-file "$outdir\autoruns.txt"
 }
+
 output-finding "Executing msinfo32, please hold.."
 get-computerinfo > "$outdir\computerinfo.txt"
 Start-process -FilePath "msinfo32" -NoNewWindow -ArgumentList "/nfo", "$outdir\msinfo32.nfo" -Wait 
