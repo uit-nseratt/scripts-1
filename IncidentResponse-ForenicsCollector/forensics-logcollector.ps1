@@ -16,10 +16,21 @@ $ErrorActionPreference = "SilentlyContinue"
 function Get-TimeStamp { return "[{0:MM/dd/yy} {0:HH:mm:ss tt}]" -f (Get-Date) }
 function Get-FileDateFormat {  return "{0:MM-dd-yy_hh-mmtt}" -f (Get-Date) }
 function output-finding {
+# fix this so it also writes to main app run log file . like "tee"
+
+#also allow for paramters.. like launching a process and putting the timestamps into the output file
+#arg: Cmd: launch process
+#arg: outputfile: output file
+#arg: append
+# it will also write the top line to the output file with the command . ex: "# CMD : whoami "
+
+#output-finding -Cmd "whoami" -OutputFile "$outdir\whoami.txt" "Executing whoami .."
+
     $string = $args[0]
     write-host "`n$(Get-Timestamp) ---`n$string`n"
 }
-function Test-Administrator { 
+function Test-Administrator  
+{ 
     [OutputType([bool])]
     param()
     process {
@@ -28,7 +39,7 @@ function Test-Administrator {
     }
 }
 
-$outdir = "$env:temp\sec_collector"
+$outdir = "$env:temp\IoC-collect"
 $outzip = "$env:temp\sysinfo-$env:computername-$(Get-FileDateFormat).zip"
 
  #Check user is running the script is member of Administrator Group
@@ -58,11 +69,15 @@ if (! (test-path -path "$outdir")) { new-item -Force -Path "$outdir" -ItemType "
 
 output-finding "Collecting windows event viewer files (Application, Security, System, etc.):"
 output-finding "Executing Export Application Event Log"
+
 & wevtutil epl Application "$outdir\Application.evtx"
 output-finding "Executing Export Hardware Events Log:"
+
 & wevtutil epl HardwareEvents "$outdir\HardwareEvents.evtx"
+
 output-finding "Executing Export Security Event Log:"
 & wevtutil epl Security "$outdir\Security.evtx"
+
 output-finding "Executing Export System Event Log:"
 & wevtutil epl System "$outdir\System.evtx" 
 
@@ -212,18 +227,18 @@ output-finding "Executing local certificate store collection"
 output-finding "Listing all installed apps, please hold..."
 & wmic product get /format:csv > "$outdir\allApps.csv"
 
-  $webdlurl = "https://download.sysinternals.com/files/Autoruns.zip"
+ $webdlurl = "https://download.sysinternals.com/files/Autoruns.zip"
   $autoruns_outfile = "$env:temp\autoruns.zip"
 if (! (Test-path -Path "$env:temp\autoruns.zip")) {
   output-finding "Downloading Microsoft AutoRuns."
-
+ 
     try {
        $autoruns_dl=(Invoke-WebRequest -Uri "$webdlurl" -OutFile "$autoruns_outfile"  -ErrorAction Stop)
        $StatusCode = $Response.StatusCode
     } catch {
        $StatusCode = $_.Exception.Response.StatusCode.value__
     }
-} else { $StatusCode = "0" ; }
+} else { $StatusCode = "0" }
 
  if ($StatusCode -eq "0" -and ! (Test-Path -Path "$env:temp\autoruns\autorunsc.exe")) {
     output-finding "Extracting Microsoft AutoRuns."
