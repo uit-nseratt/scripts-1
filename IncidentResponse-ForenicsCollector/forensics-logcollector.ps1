@@ -148,8 +148,8 @@ output-finding "Executing List Active User Sessions"
 
 
 
-output-finding "Executing netstat -ao, this might take some time, please hold..."
-& netstat -ao > "$outdir\netstat-all.txt"
+output-finding "Executing netstat -ano, this might take some time, please hold..."
+& netstat -ano > "$outdir\netstat-all.txt"
 
 output-finding "Executing netsh advfirewall export"
 & netsh advfirewall export "$outdir\advfirewallpolicy.txt"
@@ -229,7 +229,7 @@ if (! (Test-path -Path "$env:temp\autoruns.zip")) {
   output-finding "Downloading Microsoft AutoRuns."
  
     try {
-       $autoruns_dl=(Invoke-WebRequest -Uri "$webdlurl" -OutFile "$autoruns_outfile"  -ErrorAction Stop)
+       $autoruns_dl=(Invoke-WebRequest -Uri "$webdlurl" -OutFile "$autoruns_outfile"  -ErrorAction SilentlyContinue)
        $StatusCode = $Response.StatusCode
     } catch {
        $StatusCode = $_.Exception.Response.StatusCode.value__
