@@ -52,13 +52,10 @@ if ($test -contains "Remote-Desktop-Services") {  "Remote Desktop Sharing" |Tee-
 if ($test -contains "RDS-Web-Access") {  "Remote Desktop Sharing: RemoteApps" |Tee-Object -append  -file "$output" } 
 
  "`r`n_ Installed Server Features: _`r`n" |Tee-Object -append -file "$output"
-foreach ($a in $test2) { 
-"$a" | Tee-Object -append -file "$output"
+  foreach ($a in $test2) { 
+    "$a" | Tee-Object -append -file "$output"
+  }
  }
-
-
-
-}
  }
  write-host "Done. Open file: $output"
 }
