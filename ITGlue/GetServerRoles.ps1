@@ -1,4 +1,4 @@
-# copy/paste into powershell (running as admin). Open the server_roles.txt on desktop.
+# Login to domain controller. copy/paste into powershell (running as admin). Open the server_roles.txt on desktop.
 
 function IsInteractive { 
     $non_interactive = '-command', '-c', '-encodedcommand', '-e', '-ec', '-file', '-f'
