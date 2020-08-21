@@ -43,7 +43,6 @@ if ($test -contains "AD-Domain-Services") {
 if ($test -contains "FS-FileServer") {   "File server" |Tee-Object -append -file "$output" }
 if ($test -contains "Print-Server") { "Print Server" |Tee-Object -append -file  "$output"  }
 if ($test -contains "GPMC") {  "Group Policy Management" |Tee-Object  -append -file "$output" }
-
 if ($test -contains "DNS") {  "DNS Server" |Tee-Object  -append -file "$output" }
 if ($test -contains "DHCP") {  "DHCP Server" |Tee-Object -append  -file "$output" }
 if ($test -contains "web-server") {  "Web Server (IIS)" |Tee-Object -append  -file "$output" }
