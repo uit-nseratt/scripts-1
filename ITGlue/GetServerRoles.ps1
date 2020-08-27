@@ -71,16 +71,11 @@ if ($a.SystemComponent -eq "1" -or -not $a.DisplayName) { continue }
  }
  }
  
- 
- 
- 
  write-host "`r`n`r`n *** Done. Open file: $output"
- 
- 
- 
  
 }
 
 
 getroles
+
 
