@@ -51,9 +51,11 @@ if ($test -contains "smtp-server") {  "SMTP Server" |Tee-Object -append  -file "
 if ($test -contains "Remote-Desktop-Services") {  "Remote Desktop Sharing" |Tee-Object -append  -file "$output" }
 if ($test -contains "RDS-Web-Access") {  "Remote Desktop Sharing: RemoteApps" |Tee-Object -append  -file "$output" } 
 
+if ($test2) {
  "`r`n_ Installed Server Features: _`r`n" |Tee-Object -append -file "$output"
   foreach ($a in $test2) { 
     "$a" | Tee-Object -append -file "$output"
+  }
   }
   
   $Apps = @()
@@ -77,7 +79,7 @@ if ($a.SystemComponent -eq "1" -or -not $a.DisplayName) { continue }
  
  
  
- write-host "Done. Open file: $output"
+ write-host "`r`n`r`n *** Done. Open file: $output"
  
  
  
