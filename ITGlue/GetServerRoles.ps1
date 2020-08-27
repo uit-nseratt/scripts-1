@@ -67,12 +67,7 @@ foreach ($a in $Apps) {
 if ($a.SystemComponent -eq "1" -or -not $a.DisplayName) { continue }
   $a.DisplayName | Tee-Object -append -file "$output"
 }
-}
-
-
-  
-  
-  
+}  
  }
  }
  
