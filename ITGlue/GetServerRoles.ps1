@@ -65,7 +65,9 @@ if ($Apps) {
  "`r`n_ Installed Applications: _`r`n" |Tee-Object -append -file "$output"
 foreach ($a in $Apps) { 
 if ($a.SystemComponent -eq "1" -or -not $a.DisplayName) { continue }
-  $a.DisplayName | Tee-Object -append -file "$output"
+$appname =  $a.DisplayName
+$appver = $a.DisplayVersion
+"$appname $(if ($appver){"`[$appver`]"}) " | Tee-Object -append -file "$output"
 }
 }  
  }
