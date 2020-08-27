@@ -23,6 +23,7 @@ if (test-path "$output") {
 	remove-item "$output"
 } 
 $servers = (Get-ADComputer -Filter {OperatingSystem -like "*windows*server*"}  | where Enabled | select DNSHostName).DNSHostName
+"==== Server Statuses as of $(Get-date) ==== `r`n`r`n" |Tee-Object -append -file "$output"
 
 foreach ($srv in $servers) { 
 if (! (test-connection -computername $srv -quiet -count 1)) {
