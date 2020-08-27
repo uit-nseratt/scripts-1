@@ -54,9 +54,33 @@ if ($test -contains "RDS-Web-Access") {  "Remote Desktop Sharing: RemoteApps" |T
   foreach ($a in $test2) { 
     "$a" | Tee-Object -append -file "$output"
   }
+  
+  $Apps = @()
+$Apps += Invoke-command -computername $srv {Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" }
+$Apps += Invoke-command -computername $srv {Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" }
+if ($Apps) {
+ "`r`n_ Installed Applications: _`r`n" |Tee-Object -append -file "$output"
+foreach ($a in $Apps) { 
+if ($a.SystemComponent -eq "1" -or -not $a.DisplayName) { continue }
+  $a.DisplayName | Tee-Object -append -file "$output"
+}
+}
+
+
+  
+  
+  
  }
  }
+ 
+ 
+ 
+ 
  write-host "Done. Open file: $output"
+ 
+ 
+ 
+ 
 }
 
 
