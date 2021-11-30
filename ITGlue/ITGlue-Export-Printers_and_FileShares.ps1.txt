@@ -3,7 +3,6 @@
 # For importing data into IT Glue 
 # Pull information from Print Servers & File Servers
 #
-# Author: Nick Seratt <nseratt@focustsi.com>
 # 
 ###################################################
 
